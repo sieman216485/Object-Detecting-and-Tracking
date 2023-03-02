@@ -1,6 +1,7 @@
 import math
 
 class EuclideanDistanceTracker:
+
     def __init__(self):
         # Store the center positions of the objects
         self.center_points = {}
@@ -9,13 +10,13 @@ class EuclideanDistanceTracker:
         # Each time a new object is detected, the count will increase by one
         self.id_count = 0
 
-    def update(self, objects_rect):
+    def update(self, object_boxes):
         # Object boxes and ids
         object_boxes_ids = []
 
         # Get center point of new object
-        for rect in objects_rect:
-            x, y, w, h = rect
+        for object_box in object_boxes:
+            x, y, w, h = object_box
             cx = (x + x + w) // 2
             cy = (y + y + h) // 2
 
@@ -26,12 +27,14 @@ class EuclideanDistanceTracker:
 
                 if distance < 25:
                     self.center_points[id] = (cx, cy)
+
                     print(self.center_points)
+
                     object_boxes_ids.append([x, y, w, h, id])
                     same_object_detected = True
                     break
 
-            # New object is detected we assign the ID to that object
+            # New object is detected, we assign the ID to that object
             if same_object_detected is False:
                 self.center_points[self.id_count] = (cx, cy)
                 object_boxes_ids.append([x, y, w, h, self.id_count])
