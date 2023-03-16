@@ -10,13 +10,14 @@ if __name__== "__main__":
     capture = cv2.VideoCapture("highway.mp4")
 
     # Object detection
-    object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 40)
+    object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 16)
     # object_detector = cv2.createBackgroundSubtractorKNN()
 
     start = time.time_ns()
     frame_count = 0
     fps = -1
 
+    #  Set mouse click callback function
     object_clicked = False
     object_selected = False
     ox, oy = -1, -1
@@ -42,38 +43,31 @@ if __name__== "__main__":
         # Increase frame count
         frame_count += 1
 
-        height, width, _ = frame.shape
+        # 1. Object Detection
+        mask = object_detector.apply(frame)
+        _, mask = cv2.threshold(mask, 254, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        detections = []
+        for contour in contours:
+            # Calculate area and remove small elements
+            area = cv2.contourArea(contour)
+            if area > 50:
+                # cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+                x, y, w, h = cv2.boundingRect(contour)
+
+                detections.append([x, y, w, h])
+
+        # 2. Object Tracking
+        boxes_ids = tracker.update(detections)
 
         if object_clicked:
-            # 1. Object Detection
-            mask = object_detector.apply(frame)
-            _, mask = cv2.threshold(mask, 254, 255, cv2.THRESH_BINARY)
-            contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-            detections = []
-            for contour in contours:
-                # Calculate area and remove small elements
-                area = cv2.contourArea(contour)
-                if area > 100:
-                    # cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-                    x, y, w, h = cv2.boundingRect(contour)
-                    detections.append([x, y, w, h])
-
-            # 2. Object Tracking
-            boxes_ids = tracker.update(detections)
-
             if not object_selected:
-                # print(len(boxes_ids))
-
-                if len(boxes_ids) == 0:
-                    continue
-
                 for box_id in boxes_ids:
                     x, y, w, h, id = box_id
                     if ox >= x and ox <= x + w and oy >= y and oy <= y + h:
                         selected_object_ids.append(id)
-                        # print(id)
-                        # break
+
                 if len(selected_object_ids) > 0:
                     object_selected = True
 
@@ -83,8 +77,6 @@ if __name__== "__main__":
                     if id in selected_object_ids:
                         # cv2.putText(frame, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
                         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-
-            # cv2.imshow("Mask", mask)
 
         # Calculate frames per second (FPS)
         if frame_count >= 30:
