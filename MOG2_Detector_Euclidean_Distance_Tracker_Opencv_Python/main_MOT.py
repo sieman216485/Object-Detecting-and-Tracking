@@ -13,6 +13,7 @@ if __name__== "__main__":
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 16)
     # object_detector = cv2.createBackgroundSubtractorKNN()
 
+    # Initialize calculating FPS
     start = time.time_ns()
     frame_count = 0
     fps = -1
@@ -26,8 +27,6 @@ if __name__== "__main__":
         # Increase frame count
         frame_count += 1
         # timer = cv2.getTickCount()
-
-        height, width, _ = frame.shape
 
         # Extract region of interest
         roi = frame[340:720, 500:800]

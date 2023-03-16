@@ -13,11 +13,12 @@ if __name__== "__main__":
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 16)
     # object_detector = cv2.createBackgroundSubtractorKNN()
 
+    # Initialize calculating FPS
     start = time.time_ns()
     frame_count = 0
     fps = -1
 
-    #  Set mouse click callback function
+    # Set mouse click callback function
     object_clicked = False
     object_selected = False
     ox, oy = -1, -1
