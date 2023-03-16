@@ -10,7 +10,7 @@ if __name__== "__main__":
     capture = cv2.VideoCapture("highway.mp4")
 
     # Object detection
-    object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 40)
+    object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 16)
     # object_detector = cv2.createBackgroundSubtractorKNN()
 
     start = time.time_ns()
