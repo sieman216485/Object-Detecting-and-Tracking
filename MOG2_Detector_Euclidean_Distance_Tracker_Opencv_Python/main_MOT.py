@@ -7,7 +7,7 @@ if __name__== "__main__":
     # Create tracker object
     tracker = EuclideanDistanceTracker()
 
-    capture = cv2.VideoCapture("highway.mp4")
+    capture = cv2.VideoCapture("../Test_Video_Files/highway.mp4")
 
     # Object detection
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 16)
