@@ -57,7 +57,7 @@ if __name__== "__main__":
 
         # Calculate frames per second (FPS)
         # cv_fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
-        if (frame_count >= 30):
+        if frame_count >= 30:
             end = time.time_ns()
             fps = 1000000000 * frame_count / (end - start)
             frame_count = 0
