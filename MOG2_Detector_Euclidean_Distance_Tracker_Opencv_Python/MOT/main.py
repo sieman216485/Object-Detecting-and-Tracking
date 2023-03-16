@@ -1,7 +1,9 @@
 import cv2
+import time
 from tracker import *
 
 if __name__== "__main__":
+
     # Create tracker object
     tracker = EuclideanDistanceTracker()
 
@@ -11,16 +13,25 @@ if __name__== "__main__":
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 40)
     # object_detector = cv2.createBackgroundSubtractorKNN()
 
+    start = time.time_ns()
+    frame_count = 0
+    fps = -1
+
     while True:
         # Read a new frame
         ok, frame = capture.read()
         if not ok:
             break
 
+        # Increase frame count
+        frame_count += 1
+        # timer = cv2.getTickCount()
+
         height, width, _ = frame.shape
 
         # Extract region of interest
         roi = frame[340:720, 500:800]
+        # roi = frame
 
         # 1. Object Detection
         mask = object_detector.apply(roi)
@@ -43,6 +54,20 @@ if __name__== "__main__":
             x, y, w, h, id = box_id
             cv2.putText(roi, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
             cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 255, 0), 3)
+
+        # Calculate frames per second (FPS)
+        # cv_fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
+        if (frame_count >= 30):
+            end = time.time_ns()
+            fps = 1000000000 * frame_count / (end - start)
+            frame_count = 0
+            start = time.time_ns()
+
+        # Display FPS on frame
+        # cv2.putText(frame, "FPS: " + str(int(cv_fps)), (100, 50), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 2)
+        if fps > 0:
+            fps_label = "FPS: %.2f" % fps
+            cv2.putText(frame, fps_label, (10, 25), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
 
         cv2.imshow("roi", roi)
         cv2.imshow("Frame", frame)
