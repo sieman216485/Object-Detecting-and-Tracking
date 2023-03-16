@@ -12,7 +12,11 @@ if __name__== "__main__":
     # object_detector = cv2.createBackgroundSubtractorKNN()
 
     while True:
-        ret, frame = capture.read()
+        # Read a new frame
+        ok, frame = capture.read()
+        if not ok:
+            break
+
         height, width, _ = frame.shape
 
         # Extract region of interest
