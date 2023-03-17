@@ -135,9 +135,11 @@ if __name__== "__main__":
 
         for (class_id, confidence, box) in zip(class_ids, confidences, boxes):
             color = COLORS[int(class_id) % len(COLORS)]
+            label = "%s (%d%%)" % (class_list[class_id], int(confidence * 100))
+
             cv2.rectangle(frame, box, color, 2)
             cv2.rectangle(frame, (box[0], box[1] - 20), (box[0] + box[2], box[1]), color, -1)
-            cv2.putText(frame, class_list[class_id], (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 0, 0))
+            cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 0, 0))
 
         if frame_count >= 30:
             end = time.time_ns()
@@ -147,7 +149,7 @@ if __name__== "__main__":
 
         if fps > 0:
             fps_label = "FPS: %.2f" % fps
-            cv2.putText(frame, fps_label, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(frame, fps_label, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         cv2.imshow("Frame", frame)
 
