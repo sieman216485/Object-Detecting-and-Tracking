@@ -1,4 +1,5 @@
 import cv2
+import sys
 import time
 from tracker import *
 
@@ -8,6 +9,15 @@ if __name__== "__main__":
     tracker = EuclideanDistanceTracker()
 
     capture = cv2.VideoCapture("../Test_Video_Files/highway.mp4")
+
+    if not capture.isOpened():
+        print("Cannot open video file")
+        sys.exit()
+
+    ok, frame = capture.read()
+    if not ok:
+        print("Cannot read video file")
+        sys.exit()
 
     # Object detection
     object_detector = cv2.createBackgroundSubtractorMOG2(history = 100, varThreshold = 16)
