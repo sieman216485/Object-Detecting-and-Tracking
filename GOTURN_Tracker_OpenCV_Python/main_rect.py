@@ -1,5 +1,33 @@
 import cv2
 import sys
+import time
+
+def compare_opencv_version(major, minor, subminor):
+    (current_major, current_minor, current_subminor) = cv2.__version__.split(".")
+
+    current_major = int(current_major)
+    current_minor = int(current_minor)
+    current_subminor = int(current_subminor)
+
+    if major >= 0:
+        if major > current_major:
+            return -1
+        elif major < current_major:
+            return 1
+
+    if minor >= 0:
+        if minor > current_minor:
+            return -1
+        elif minor < current_minor:
+            return 1
+
+    if subminor >= 0:
+        if subminor > current_subminor:
+            return -1
+        elif subminor < current_subminor:
+            return 1
+
+    return 0
 
 if __name__ == "__main__":
 
@@ -13,15 +41,18 @@ if __name__ == "__main__":
     TRACKER_MOSSE = "MOSSE"
     TRACKER_CSRT = "CSRT"
 
-    tracker_type = TRACKER_GOTURN
+    # tracker_type = TRACKER_GOTURN
+    tracker_type = TRACKER_KCF
 
-    (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split(".")
-
-    if int(minor_ver) < 3:
+    # if int(minor_ver) < 3:
+    if compare_opencv_version(-1, 3, -1) < 0:
         tracker = cv2.Tracker_create(tracker_type)
     else:
         if tracker_type == TRACKER_BOOSTING:
-            tracker = cv2.TrackerBoosting_create()
+            if compare_opencv_version(4, 5, 1) < 0:
+                tracker = cv2.TrackerBoosting_create()
+            else:
+                tracker = cv2.legacy.upgradeTrackingAPI(cv2.legacy.TrackerBoosting_create())
 
         if tracker_type == TRACKER_MIL:
             tracker = cv2.TrackerMIL_create()
@@ -30,22 +61,31 @@ if __name__ == "__main__":
             tracker = cv2.TrackerKCF_create()
 
         if tracker_type == TRACKER_TLD:
-            tracker = cv2.TrackerTLD_create()
+            if compare_opencv_version(4, 5, 1) < 0:
+                tracker = cv2.TrackerTLD_create()
+            else:
+                tracker = cv2.legacy.upgradeTrackingAPI(cv2.legacy.TrackerTLD_create())
 
         if tracker_type == TRACKER_MEDIANFLOW:
-            tracker = cv2.TrackerMedianFlow_create()
+            if compare_opencv_version(4, 5, 1) < 0:
+                tracker = cv2.TrackerMedianFlow_create()
+            else:
+                tracker = cv2.legacy.upgradeTrackingAPI(cv2.legacy.TrackerMedianFlow_create())
 
         if tracker_type == TRACKER_GOTURN:
             tracker = cv2.TrackerGOTURN_create()
 
         if tracker_type == TRACKER_MOSSE:
-            tracker = cv2.TrackerMOSSE_create()
+            if compare_opencv_version(4, 5, 1) < 0:
+                tracker = cv2.TrackerMOSSE_create()
+            else:
+                tracker = cv2.legacy.upgradeTrackingAPI(cv2.legacy.TrackerMOSSE_create())
 
         if tracker_type == TRACKER_CSRT:
             tracker = cv2.TrackerCSRT_create()
 
     # Open video file
-    capture = cv2.VideoCapture("../Test_Video_Files/highway.mp4")
+    capture = cv2.VideoCapture("../Test_Video_Files/cars.mp4")
 
     if not capture.isOpened():
         print("Cannot open video file")
@@ -55,6 +95,11 @@ if __name__ == "__main__":
     if not ok:
         print("Cannot read video file")
         sys.exit()
+
+    # Initialize calculating FPS
+    start = time.time_ns()
+    frame_count = 0
+    fps = -1
 
     # Define an initial bounding box
     bounding_box = (10, 10, 100, 100)
@@ -71,14 +116,18 @@ if __name__ == "__main__":
         if not ok:
             break
 
-        # Start timer
-        timer = cv2.getTickCount()
+        # Increase frame count
+        frame_count += 1
 
         # Update tracker
         ok, bounding_box = tracker.update(frame)
 
         # Calculate Frames per second (FPS)
-        fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer);
+        if frame_count >= 30:
+            end = time.time_ns()
+            fps = 1000000000 * frame_count / (end - start)
+            frame_count = 0
+            start = time.time_ns()
 
         # Draw bounding box
         if ok:
@@ -88,13 +137,15 @@ if __name__ == "__main__":
             cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
         else:
             # Tracking failure
-            cv2.putText(frame, "Tracking failure detected", (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
+            cv2.putText(frame, "Tracking failure detected", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
 
         # Display tracker type on frame
-        cv2.putText(frame, tracker_type + " Tracker", (100, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
+        cv2.putText(frame, tracker_type + " Tracker", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
 
         # Display FPS on frame
-        cv2.putText(frame, "FPS : " + str(int(fps)), (100, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
+        if fps > 0:
+            fps_label = "FPS: %.2f" % fps
+            cv2.putText(frame, fps_label, (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
 
         # Display result
         cv2.imshow("Tracking", frame)
