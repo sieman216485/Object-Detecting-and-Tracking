@@ -72,15 +72,18 @@ if __name__== "__main__":
         # 2. Object Tracking
         boxes_ids = tracker.update(detections)
 
-        if object_clicked:
-            if not object_selected:
+        if object_clicked or object_selected:
+            if object_clicked and not object_selected:
+                selected_object_ids = []
+
                 for box_id in boxes_ids:
                     x, y, w, h, id = box_id
                     if ox >= x and ox <= x + w and oy >= y and oy <= y + h:
                         selected_object_ids.append(id)
+                        break
 
-                if len(selected_object_ids) > 0:
-                    object_selected = True
+                object_selected = True
+                object_clicked = False
 
             if object_selected and len(selected_object_ids) > 0:
                 for box_id in boxes_ids:
