@@ -122,13 +122,6 @@ if __name__ == "__main__":
         # Update tracker
         ok, bounding_box = tracker.update(frame)
 
-        # Calculate Frames per second (FPS)
-        if frame_count >= 30:
-            end = time.time_ns()
-            fps = 1000000000 * frame_count / (end - start)
-            frame_count = 0
-            start = time.time_ns()
-
         # Draw bounding box
         if ok:
             # Tracking success
@@ -138,6 +131,13 @@ if __name__ == "__main__":
         else:
             # Tracking failure
             cv2.putText(frame, "Tracking failure detected", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
+
+        # Calculate Frames per second (FPS)
+        if frame_count >= 30:
+            end = time.time_ns()
+            fps = 1000000000 * frame_count / (end - start)
+            frame_count = 0
+            start = time.time_ns()
 
         # Display tracker type on frame
         cv2.putText(frame, tracker_type + " Tracker", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
