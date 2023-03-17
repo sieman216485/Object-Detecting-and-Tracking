@@ -42,8 +42,8 @@ if __name__== "__main__":
             object_selected = False
             selected_object_ids = []
 
-    cv2.namedWindow('Frame')
-    cv2.setMouseCallback('Frame', mouse_click)
+    cv2.namedWindow("Frame")
+    cv2.setMouseCallback("Frame", mouse_click)
 
     while True:
         # Read a new frame
