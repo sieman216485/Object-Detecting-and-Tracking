@@ -101,7 +101,7 @@ if __name__== "__main__":
     with open("classes.txt", "r") as classes_file:
         class_list = [class_name.strip() for class_name in classes_file.readlines()]
 
-    capture = cv2.VideoCapture("../Test_Video_Files/test.mp4")
+    capture = cv2.VideoCapture("../Test_Video_Files/road.mp4")
 
     if not capture.isOpened():
         print("Cannot open video file")
