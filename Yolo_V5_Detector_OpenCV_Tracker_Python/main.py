@@ -37,6 +37,7 @@ if __name__== "__main__":
     object_clicked = False
     object_selected = False
     ox, oy = -1, -1
+    selected_object_bounding_box = None
 
     def mouse_click(event, x, y, flags, param):
         global ox, oy, object_clicked, object_selected
