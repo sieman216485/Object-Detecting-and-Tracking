@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 
+# YOLO Versions
+YOLO_V5 = 5
+YOLO_V8 = 8
+
 # Constants
 _INPUT_WIDTH = 640
 _INPUT_HEIGHT = 640
@@ -8,9 +12,10 @@ _SCORE_THRESHOLD = 0.2
 _NMS_THRESHOLD = 0.4
 _CONFIDENCE_THRESHOLD = 0.4
 
-class YoloV5Detector:
+class YoloDetector:
 
-    def __init__(self, onnx_file_path, class_list_file_path, is_cuda):
+    def __init__(self, version, onnx_file_path, class_list_file_path, is_cuda):
+        self._version = version
         self._build_model(onnx_file_path, is_cuda)
 
         self._class_list = []
@@ -18,9 +23,9 @@ class YoloV5Detector:
             self._class_list = [class_name.strip() for class_name in classes_file.readlines()]
 
     def apply(self, image):
-        yolov5_image = self._format_yolov5(image)
-        detections = self._detect(yolov5_image)
-        return self._wrap_detection(yolov5_image, detections[0])
+        yolo_image = self._format_yolo(image)
+        detections = self._detect(yolo_image)
+        return self._wrap_detection(yolo_image, detections[0])
 
     def _build_model(self, onnx_file_path, is_cuda):
         self._net = cv2.dnn.readNet(onnx_file_path)
@@ -39,6 +44,11 @@ class YoloV5Detector:
         self._net.setInput(blob)
         output = self._net.forward()
         # output = net.forward(net.getUnconnectedOutLayersNames())
+
+        if self._version == YOLO_V8:
+            output = output.transpose((0, 2, 1))
+
+        print(output.shape)
 
         return output
 
@@ -59,9 +69,14 @@ class YoloV5Detector:
             confidence = row[4]
 
             if confidence >= _CONFIDENCE_THRESHOLD:
-                classes_scores = row[5:]
+                classes_scores = row[5:] # v5
+
+                if (self._version == YOLO_V8):
+                    classes_scores = row[4:]
+
                 _, _, _, max_index = cv2.minMaxLoc(classes_scores)
                 class_id = max_index[1]
+                print(class_id)
 
                 if (classes_scores[class_id] >= _SCORE_THRESHOLD):
                     confidences.append(confidence)
@@ -93,7 +108,7 @@ class YoloV5Detector:
 
         return result_class_ids, result_class_names, result_confidences, result_boxes
 
-    def _format_yolov5(self, image):
+    def _format_yolo(self, image):
         row, col, _ = image.shape
         _max = max(col, row)
         result = np.zeros((_max, _max, 3), np.uint8)
