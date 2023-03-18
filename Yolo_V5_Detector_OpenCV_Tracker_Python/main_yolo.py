@@ -10,7 +10,8 @@ if __name__== "__main__":
 
     is_cuda = len(sys.argv) > 1 and sys.argv[1] == "cuda"
 
-    yolo_v5_detector = YoloV5Detector("yolov5s.onnx", "classes.txt", is_cuda)
+    yolo_v5_detector = YoloV5Detector("model/yolov8s.onnx", "model/classes.txt", is_cuda)
+    # yolo_v5_detector = YoloV5Detector("model/YOLOv5s.onnx", "model/classes.txt", is_cuda)
 
     capture = cv2.VideoCapture("../Test_Video_Files/road.mp4")
 
