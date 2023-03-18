@@ -1,8 +1,7 @@
 import cv2
 import time
 import sys
-import importlib
-from yolo_v5 import *
+from yolo_detector import *
 
 sys.path.append("..")
 from GOTURN_Tracker_OpenCV_Python.tracker import *
@@ -12,7 +11,7 @@ if __name__== "__main__":
 
     is_cuda = len(sys.argv) > 1 and sys.argv[1] == "cuda"
 
-    yolo_v5_detector = YoloV5Detector("yolov5s.onnx", "classes.txt", is_cuda)
+    yolo_detector = YoloDetector(YOLO_V8, "models/YOLOv8s.onnx", "models/classes.txt", is_cuda)
 
     # tracker = OpenCVTracker()
     tracker = None
@@ -66,7 +65,7 @@ if __name__== "__main__":
 
                 tracker = OpenCVTracker()
 
-                class_ids, class_names, confidences, boxes = yolo_v5_detector.apply(frame)
+                class_ids, class_names, confidences, boxes = yolo_detector.apply(frame)
 
                 for (class_id, class_name, confidence, box) in zip(class_ids, class_names, confidences, boxes):
                     x, y, w, h = box

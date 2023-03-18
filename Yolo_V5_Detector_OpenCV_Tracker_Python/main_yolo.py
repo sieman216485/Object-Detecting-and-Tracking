@@ -1,7 +1,7 @@
 import cv2
 import time
 import sys
-from yolo_v5 import *
+from yolo_detector import *
 
 COLORS = [(255, 255, 0), (0, 255, 0), (0, 255, 255), (255, 0, 0)]
 
@@ -10,8 +10,8 @@ if __name__== "__main__":
 
     is_cuda = len(sys.argv) > 1 and sys.argv[1] == "cuda"
 
-    yolo_v5_detector = YoloV5Detector("model/yolov8s.onnx", "model/classes.txt", is_cuda)
-    # yolo_v5_detector = YoloV5Detector("model/YOLOv5s.onnx", "model/classes.txt", is_cuda)
+    # yolo_detector = YoloDetector(YOLO_V5, "models/YOLOv5s.onnx", "models/classes.txt", is_cuda)
+    yolo_detector = YoloDetector(YOLO_V8, "models/YOLOv8s.onnx", "models/classes.txt", is_cuda)
 
     capture = cv2.VideoCapture("../Test_Video_Files/road.mp4")
 
@@ -38,7 +38,7 @@ if __name__== "__main__":
         if frame is None:
             break
 
-        class_ids, class_names, confidences, boxes = yolo_v5_detector.apply(frame)
+        class_ids, class_names, confidences, boxes = yolo_detector.apply(frame)
 
         frame_count += 1
 

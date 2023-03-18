@@ -48,8 +48,6 @@ class YoloDetector:
         if self._version == YOLO_V8:
             output = output.transpose((0, 2, 1))
 
-        print(output.shape)
-
         return output
 
     def _wrap_detection(self, image, detections):
@@ -76,7 +74,6 @@ class YoloDetector:
 
                 _, _, _, max_index = cv2.minMaxLoc(classes_scores)
                 class_id = max_index[1]
-                print(class_id)
 
                 if (classes_scores[class_id] >= _SCORE_THRESHOLD):
                     confidences.append(confidence)
