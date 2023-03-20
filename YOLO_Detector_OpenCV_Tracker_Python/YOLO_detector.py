@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 
 # YOLO Versions
@@ -14,13 +15,17 @@ _CONFIDENCE_THRESHOLD = 0.4
 
 class YoloDetector:
 
-    def __init__(self, version = YOLO_V5, is_cuda = False, onnx_file_path = None, class_list_file_path = "models/classes.txt"):
+    def __init__(self, version = YOLO_V5, is_cuda = False, onnx_file_path = None, class_list_file_path = None):
         self._version = version
 
-        if (version == YOLO_V5):
-            onnx_file_path = "models/YOLOv5s.onnx"
-        elif (version == YOLO_V8):
-            onnx_file_path = "models/YOLOv8s.onnx"
+        if onnx_file_path is None:
+            if (version == YOLO_V5):
+                onnx_file_path = os.path.join(os.path.dirname(__file__), "models/YOLOv5s.onnx")
+            elif (version == YOLO_V8):
+                onnx_file_path = os.path.join(os.path.dirname(__file__), "models/YOLOv8s.onnx")
+
+        if class_list_file_path is None:
+            class_list_file_path = os.path.join(os.path.dirname(__file__), "models/classes.txt")
 
         self._build_model(onnx_file_path, is_cuda)
 
