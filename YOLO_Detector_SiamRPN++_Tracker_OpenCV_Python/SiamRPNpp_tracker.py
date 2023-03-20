@@ -1,4 +1,3 @@
-import argparse
 import cv2 as cv
 import numpy as np
 import os
@@ -75,7 +74,7 @@ class Anchors:
         return anchors
 
 class SiamRPNppTracker:
-    def __init__(self, target_net, search_net, rpn_head, is_cuda):
+    def __init__(self, is_cuda, target_net_file = None, search_net_file = None, rpn_head_file = None):
         super(SiamRPNppTracker, self).__init__()
         self.anchor_stride = 8
         self.anchor_ratios = [0.33, 0.5, 1, 2, 3]
@@ -95,9 +94,16 @@ class SiamRPNppTracker:
         self.window = np.tile(window.flatten(), self.anchor_num)
         self.anchors = self.generate_anchor(self.score_size)
 
-        target_net = cv.dnn.readNetFromONNX(target_net)
-        search_net = cv.dnn.readNetFromONNX(search_net)
-        rpn_head = cv.dnn.readNetFromONNX(rpn_head)
+        if target_net_file is None:
+            target_net_file = os.path.join(os.path.dirname(__file__), "models/target_net.onnx")
+        if search_net_file is None:
+            search_net_file = os.path.join(os.path.dirname(__file__), "models/search_net.onnx")
+        if rpn_head_file is None:
+            rpn_head_file = os.path.join(os.path.dirname(__file__), "models/rpn_head.onnx")
+
+        target_net = cv.dnn.readNetFromONNX(target_net_file)
+        search_net = cv.dnn.readNetFromONNX(search_net_file)
+        rpn_head = cv.dnn.readNetFromONNX(rpn_head_file)
 
         if is_cuda:
             target_net.setPreferableBackend(cv.dnn.DNN_BACKEND_CUDA)

@@ -1,19 +1,18 @@
 import cv2
 import time
 import sys
-from SiamRPNpp import SiamRPNppTracker
+from SiamRPNpp_tracker import SiamRPNppTracker
 
 sys.path.append("..")
-from YOLO_Detector_OpenCV_Tracker_Python.yolo_detector import *
+from YOLO_Detector_OpenCV_Tracker_Python.YOLO_detector import *
 
 # Main function
 if __name__== "__main__":
 
     is_cuda = len(sys.argv) > 1 and sys.argv[1] == "cuda"
 
-    yolo_detector = YoloDetector(YOLO_V8, "models/YOLOv8s.onnx", "models/classes.txt", is_cuda)
+    yolo_detector = YoloDetector(YOLO_V8, is_cuda)
 
-    # tracker = OpenCVTracker()
     tracker = None
 
     capture = cv2.VideoCapture("../Test_Video_Files/road.mp4")
@@ -63,7 +62,7 @@ if __name__== "__main__":
             if object_clicked and not object_selected:
                 selected_object_bounding_box = None
 
-                tracker = OpenCVTracker()
+                tracker = SiamRPNppTracker(is_cuda)
 
                 class_ids, class_names, confidences, boxes = yolo_detector.apply(frame)
 
@@ -79,7 +78,8 @@ if __name__== "__main__":
 
             if object_selected:
                 if not (selected_object_bounding_box is None):
-                    _, selected_object_bounding_box = tracker.update(frame)
+                    output = tracker.track(frame)
+                    selected_object_bounding_box = list(map(int, output['bbox']))
 
             if not (selected_object_bounding_box is None):
                 color = (0, 0, 255)
