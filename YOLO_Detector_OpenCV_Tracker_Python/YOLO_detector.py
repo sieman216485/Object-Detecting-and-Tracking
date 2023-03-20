@@ -14,8 +14,14 @@ _CONFIDENCE_THRESHOLD = 0.4
 
 class YoloDetector:
 
-    def __init__(self, version, onnx_file_path, class_list_file_path, is_cuda):
+    def __init__(self, version = YOLO_V5, is_cuda = False, onnx_file_path = None, class_list_file_path = "models/classes.txt"):
         self._version = version
+
+        if (version == YOLO_V5):
+            onnx_file_path = "models/YOLOv5s.onnx"
+        elif (version == YOLO_V8):
+            onnx_file_path = "models/YOLOv8s.onnx"
+
         self._build_model(onnx_file_path, is_cuda)
 
         self._class_list = []
@@ -66,29 +72,34 @@ class YoloDetector:
             row = detections[r]
             confidence = row[4]
 
-            if confidence >= _CONFIDENCE_THRESHOLD:
-                classes_scores = row[5:] # v5
+            if (self._version == YOLO_V5 and confidence < _CONFIDENCE_THRESHOLD):
+                continue
 
-                if (self._version == YOLO_V8):
-                    classes_scores = row[4:]
+            if (self._version == YOLO_V5):
+                classes_scores = row[5:]
+            elif (self._version == YOLO_V8):
+                classes_scores = row[4:]
 
-                _, _, _, max_index = cv2.minMaxLoc(classes_scores)
-                class_id = max_index[1]
+            _, _, _, max_index = cv2.minMaxLoc(classes_scores)
+            class_id = max_index[1]
 
-                if (classes_scores[class_id] >= _SCORE_THRESHOLD):
+            if (classes_scores[class_id] >= _SCORE_THRESHOLD):
+                if (self._version == YOLO_V5):
                     confidences.append(confidence)
+                elif (self._version == YOLO_V8):
+                    confidences.append(classes_scores[class_id])
 
-                    class_ids.append(class_id)
+                class_ids.append(class_id)
 
-                    x, y, w, h = row[0].item(), row[1].item(), row[2].item(), row[3].item()
+                x, y, w, h = row[0].item(), row[1].item(), row[2].item(), row[3].item()
 
-                    left = int((x - w / 2) * x_factor)
-                    top = int((y - h / 2) * y_factor)
-                    width = int(w * x_factor)
-                    height = int(h * y_factor)
+                left = int((x - w / 2) * x_factor)
+                top = int((y - h / 2) * y_factor)
+                width = int(w * x_factor)
+                height = int(h * y_factor)
 
-                    box = np.array([left, top, width, height])
-                    boxes.append(box)
+                box = np.array([left, top, width, height])
+                boxes.append(box)
 
         indexes = cv2.dnn.NMSBoxes(boxes, confidences, _CONFIDENCE_THRESHOLD, _NMS_THRESHOLD)
 
