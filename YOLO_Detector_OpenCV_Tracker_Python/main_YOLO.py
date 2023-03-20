@@ -1,7 +1,7 @@
 import cv2
 import time
 import sys
-from YOLO_Detector_OpenCV_Tracker_Python.YOLO_detector import *
+from YOLO_detector import *
 
 COLORS = [(255, 255, 0), (0, 255, 0), (0, 255, 255), (255, 0, 0)]
 

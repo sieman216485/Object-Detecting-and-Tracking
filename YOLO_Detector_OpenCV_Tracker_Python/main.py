@@ -1,7 +1,7 @@
 import cv2
 import time
 import sys
-from yolo_detector import *
+from YOLO_detector import *
 
 sys.path.append("..")
 from GOTURN_Tracker_OpenCV_Python.tracker import *
