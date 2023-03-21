@@ -9,6 +9,8 @@
 
 ## Testing
 
+Add `is_cuda` argument for running on CUDA.
+
 YOLO Multiple Object Detecting
 
 ```bash
